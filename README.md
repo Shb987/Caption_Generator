@@ -32,14 +32,7 @@ pip install -r requirements.txt
 
 3. Download the Flickr8k dataset:
 
-Download the dataset from Kaggle.
-Extract the dataset to the data/flickr8k/ folder:image-caption-generator/
-└── data/
-    └── flickr8k/
-        ├── Images/
-        └── captions.txt
-
-
+Download the dataset from the drive.
 Alternatively, update the BASE_DIR variable in the notebook to point to your dataset location.
 
 
