@@ -19,7 +19,7 @@ This project implements an image captioning model using a **Convolutional Neural
 * ✅ EfficientNetB0 for image feature extraction
 * ✅ LSTM-based decoder for sequence generation
 * ✅ Supports training, inference, and deployment
-* ✅ Django web app with UI and REST API
+* ✅ Django web app with UI 
 
 ---
 
