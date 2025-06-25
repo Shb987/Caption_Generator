@@ -1,0 +1,376 @@
+
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Caption Generator</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#4f46e5',secondary:'#8b5cf6'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <style>
+        :where([class^="ri-"])::before { content: "\f3c2"; }
+        .drag-active { border-color: #4f46e5; background-color: rgba(79, 70, 229, 0.05); }
+        .image-preview-container { min-height: 300px; }
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <h1 class="ml-4 text-xl font-semibold text-gray-800">AI Image Caption Generator</h1>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Generate Captions from Your Images</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Upload an image and our AI will generate a descriptive caption for it. Perfect for social media posts, content creation, or accessibility purposes.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Upload Section -->
+                <div class="flex flex-col">
+                    <div id="upload-container" class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors image-preview-container">
+                        <div id="upload-prompt" class="text-center">
+                            <div class="w-16 h-16 mx-auto mb-4 flex items-center justify-center text-gray-400">
+                                <i class="ri-image-add-line ri-3x"></i>
+                            </div>
+                            <p class="text-lg font-medium text-gray-700 mb-2">Drag and drop your image here</p>
+                            <p class="text-sm text-gray-500 mb-4">or</p>
+                            <button id="browse-button" class="px-4 py-2 bg-primary text-white font-medium !rounded-button hover:bg-primary/90 transition-colors whitespace-nowrap">Browse Files</button>
+                            <p class="mt-4 text-xs text-gray-500">Supports JPG, PNG, WEBP (Max 5MB)</p>
+                        </div>
+                        <div id="image-preview" class="hidden w-full h-full flex items-center justify-center">
+                            <img id="preview-image" src="" alt="Preview" class="max-w-full max-h-full object-contain">
+                        </div>
+                        <div id="upload-loading" class="hidden flex flex-col items-center">
+                            <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                            <p class="text-gray-700">Uploading image...</p>
+                        </div>
+                    </div>
+                    <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp">
+                    
+                    <div id="upload-error" class="hidden mt-4 p-4 bg-red-50 text-red-700 rounded-lg">
+                        <p class="flex items-center">
+                            <span class="w-5 h-5 mr-2 flex items-center justify-center"><i class="ri-error-warning-line"></i></span>
+                            <span id="error-message">Error uploading image. Please try again.</span>
+                        </p>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-center">
+                        <button id="generate-button" disabled class="px-6 py-3 bg-gray-300 text-gray-500 font-medium !rounded-button whitespace-nowrap cursor-not-allowed transition-colors">
+                            Generate Caption
+                        </button>
+                    </div>
+                </div>
+                <!-- Results Section -->
+                <div class="flex flex-col">
+                    <div class="bg-gray-50 rounded-lg p-6 h-full">
+                        <h3 class="text-lg font-medium text-gray-800 mb-4">Generated Caption</h3>
+                        
+                        <div id="caption-placeholder" class="flex flex-col items-center justify-center h-64 text-gray-400">
+                            <div class="w-12 h-12 flex items-center justify-center mb-3">
+                                <i class="ri-file-text-line ri-2x"></i>
+                            </div>
+                            <p>Upload an image and click "Generate Caption"</p>
+                        </div>
+                        
+                        <div id="caption-loading" class="hidden flex flex-col items-center justify-center h-64">
+                            <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                            <p class="text-gray-700">Generating caption...</p>
+                        </div>
+                        
+                        <div id="caption-result" class="hidden flex flex-col h-full">
+                            <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4 flex-grow">
+                                <p id="caption-text" class="text-gray-800 whitespace-pre-line"></p>
+                            </div>
+                            
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <span id="timestamp">Generated on: June 25, 2025 at 10:30 AM</span>
+                                <span id="model-info">Model: Caption Generator v1.2</span>
+                            </div>
+                            
+                            <div class="flex space-x-3">
+                                <button id="copy-button" class="flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 font-medium !rounded-button hover:bg-gray-50 transition-colors whitespace-nowrap">
+                                    <span class="w-5 h-5 mr-2 flex items-center justify-center"><i class="ri-file-copy-line"></i></span>
+                                    Copy to Clipboard
+                                </button>
+                                <button id="try-again-button" class="flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 font-medium !rounded-button hover:bg-gray-50 transition-colors whitespace-nowrap">
+                                    <span class="w-5 h-5 mr-2 flex items-center justify-center"><i class="ri-refresh-line"></i></span>
+                                    Try Again
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="caption-error" class="hidden flex flex-col items-center justify-center h-64 text-red-500">
+                            <div class="w-12 h-12 flex items-center justify-center mb-3">
+                                <i class="ri-error-warning-line ri-2x"></i>
+                            </div>
+                            <p id="caption-error-message">Error generating caption. Please try again.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works Section -->
+        <div class="mt-12 bg-white rounded-lg shadow-md p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">How It Works</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
+                        <i class="ri-upload-cloud-line ri-2x"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-800 mb-2">1. Upload Your Image</h3>
+                    <p class="text-gray-600">Drag and drop or browse to upload your image. We support JPG, PNG, and WEBP formats.</p>
+                </div>
+                
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
+                        <i class="ri-ai-generate ri-2x"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-800 mb-2">2. AI Processing</h3>
+                    <p class="text-gray-600">Our advanced machine learning model analyzes your image to understand its content and context.</p>
+                </div>
+                
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
+                        <i class="ri-text ri-2x"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-800 mb-2">3. Get Your Caption</h3>
+                    <p class="text-gray-600">Receive a detailed, contextually accurate caption that describes your image perfectly.</p>
+                </div>
+            </div>
+        </div>
+
+        
+    </main>
+
+
+
+    <script id="file-upload-handler">
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadContainer = document.getElementById('upload-container');
+            const fileInput = document.getElementById('file-input');
+            const browseButton = document.getElementById('browse-button');
+            const uploadPrompt = document.getElementById('upload-prompt');
+            const imagePreview = document.getElementById('image-preview');
+            const previewImage = document.getElementById('preview-image');
+            const uploadLoading = document.getElementById('upload-loading');
+            const uploadError = document.getElementById('upload-error');
+            const errorMessage = document.getElementById('error-message');
+            const generateButton = document.getElementById('generate-button');
+
+            // Handle browse button click
+            browseButton.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            // Handle file selection
+            fileInput.addEventListener('change', function() {
+                handleFileSelection(this.files);
+            });
+
+            // Handle drag and drop events
+            uploadContainer.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadContainer.classList.add('drag-active');
+            });
+
+            uploadContainer.addEventListener('dragleave', function() {
+                uploadContainer.classList.remove('drag-active');
+            });
+
+            uploadContainer.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadContainer.classList.remove('drag-active');
+                handleFileSelection(e.dataTransfer.files);
+            });
+
+            function handleFileSelection(files) {
+                if (files.length === 0) return;
+                
+                const file = files[0];
+                
+                // Check file type
+                if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                    showError('Invalid file type. Please upload JPG, PNG, or WEBP images.');
+                    return;
+                }
+                
+                // Check file size (5MB max)
+                if (file.size > 5 * 1024 * 1024) {
+                    showError('File is too large. Maximum size is 5MB.');
+                    return;
+                }
+                
+                // Show loading state
+                uploadPrompt.classList.add('hidden');
+                uploadLoading.classList.remove('hidden');
+                uploadError.classList.add('hidden');
+                
+                // Simulate upload process
+                setTimeout(function() {
+                    // Display image preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                        uploadLoading.classList.add('hidden');
+                        imagePreview.classList.remove('hidden');
+                        
+                        // Enable generate button
+                        generateButton.disabled = false;
+                        generateButton.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                        generateButton.classList.add('bg-primary', 'text-white', 'hover:bg-primary/90');
+                    };
+                    reader.readAsDataURL(file);
+                }, 1000);
+            }
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                uploadError.classList.remove('hidden');
+                uploadPrompt.classList.remove('hidden');
+                uploadLoading.classList.add('hidden');
+                imagePreview.classList.add('hidden');
+            }
+        });
+    </script>
+
+    <script id="caption-generation-handler">
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateButton = document.getElementById('generate-button');
+            const captionPlaceholder = document.getElementById('caption-placeholder');
+            const captionLoading = document.getElementById('caption-loading');
+            const captionResult = document.getElementById('caption-result');
+            const captionText = document.getElementById('caption-text');
+            const captionError = document.getElementById('caption-error');
+            const captionErrorMessage = document.getElementById('caption-error-message');
+            const timestamp = document.getElementById('timestamp');
+            const copyButton = document.getElementById('copy-button');
+            const tryAgainButton = document.getElementById('try-again-button');
+
+            generateButton.addEventListener('click', function() {
+                if (generateButton.disabled) return;
+                
+                // Show loading state
+                captionPlaceholder.classList.add('hidden');
+                captionResult.classList.add('hidden');
+                captionError.classList.add('hidden');
+                captionLoading.classList.remove('hidden');
+                
+                // Simulate API call to ML model
+                setTimeout(function() {
+                    // 90% chance of success, 10% chance of error for demo purposes
+                    if (Math.random() < 0.9) {
+                        // Success - show result
+                        const captions = [
+                            "A serene mountain landscape with snow-capped peaks reflecting in a crystal-clear alpine lake, surrounded by lush pine forests under a bright blue sky.",
+                            "A bustling city street at night illuminated by colorful neon signs and street lamps, with people walking along sidewalks lined with restaurants and shops.",
+                            "A close-up portrait of a smiling young woman with curly hair against a blurred natural background, soft sunlight creating a warm glow on her face.",
+                            "An aerial view of a tropical beach with turquoise waters gently washing onto white sand, palm trees swaying in the breeze and small boats anchored offshore.",
+                            "A vintage red bicycle leaning against a weathered brick wall covered in ivy, casting long shadows in the late afternoon sunlight."
+                        ];
+                        
+                        captionText.textContent = captions[Math.floor(Math.random() * captions.length)];
+                        
+                        // Update timestamp
+                        const now = new Date();
+                        timestamp.textContent = `Generated on: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`;
+                        
+                        captionLoading.classList.add('hidden');
+                        captionResult.classList.remove('hidden');
+                    } else {
+                        // Error
+                        captionErrorMessage.textContent = "Sorry, we couldn't generate a caption. Please try again.";
+                        captionLoading.classList.add('hidden');
+                        captionError.classList.remove('hidden');
+                    }
+                }, 2500);
+            });
+
+            // Copy to clipboard functionality
+            copyButton.addEventListener('click', function() {
+                navigator.clipboard.writeText(captionText.textContent).then(function() {
+                    // Change button text temporarily
+                    const originalText = copyButton.innerHTML;
+                    copyButton.innerHTML = '<span class="w-5 h-5 mr-2 flex items-center justify-center"><i class="ri-check-line"></i></span>Copied!';
+                    
+                    setTimeout(function() {
+                        copyButton.innerHTML = originalText;
+                    }, 2000);
+                });
+            });
+
+            // Try again functionality
+            tryAgainButton.addEventListener('click', function() {
+                captionResult.classList.add('hidden');
+                captionPlaceholder.classList.remove('hidden');
+            });
+        });
+    </script>
+
+    <script id="notification-handler">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create notification container
+            const notificationContainer = document.createElement('div');
+            notificationContainer.className = 'fixed bottom-4 right-4 z-50 flex flex-col space-y-2';
+            document.body.appendChild(notificationContainer);
+
+            // Function to show notification
+            window.showNotification = function(message, type = 'success') {
+                const notification = document.createElement('div');
+                notification.className = `px-4 py-3 rounded-lg shadow-lg flex items-center ${
+                    type === 'success' ? 'bg-green-50 text-green-800' : 
+                    type === 'error' ? 'bg-red-50 text-red-800' : 
+                    'bg-blue-50 text-blue-800'
+                } transform translate-y-4 opacity-0 transition-all duration-300`;
+                
+                const icon = document.createElement('span');
+                icon.className = 'w-5 h-5 mr-2 flex items-center justify-center';
+                icon.innerHTML = `<i class="ri-${
+                    type === 'success' ? 'check-line' : 
+                    type === 'error' ? 'error-warning-line' : 
+                    'information-line'
+                }"></i>`;
+                
+                const text = document.createElement('span');
+                text.textContent = message;
+                
+                notification.appendChild(icon);
+                notification.appendChild(text);
+                notificationContainer.appendChild(notification);
+                
+                // Animate in
+                setTimeout(() => {
+                    notification.classList.remove('translate-y-4', 'opacity-0');
+                }, 10);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    notification.classList.add('translate-y-4', 'opacity-0');
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 300);
+                }, 3000);
+            };
+
+            // Example usage (uncomment to test)
+            // setTimeout(() => {
+            //     window.showNotification('Image uploaded successfully!', 'success');
+            // }, 1000);
+        });
+    </script>
+</body>
+</html>
