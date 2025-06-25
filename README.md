@@ -124,20 +124,6 @@ python manage.py runserver
 
 Visit: [http://localhost:8000](http://localhost:8000)
 
----
-
-### 3. Use the Application
-
-* Web Interface: Upload an image and receive a generated caption
-* API Endpoint: `POST /api/predict/`
-
-Example API usage:
-
-```bash
-curl -X POST -F 'image=@your_image.jpg' http://localhost:8000/api/predict/
-```
-
----
 
 ## 📌 Notes
 
@@ -148,7 +134,4 @@ curl -X POST -F 'image=@your_image.jpg' http://localhost:8000/api/predict/
 
 
 
-## 🙌 Acknowledgments
 
-* [Flickr8k Dataset](https://illinois.edu/)
-* TensorFlow/Keras for deep learning tools
