@@ -7,5 +7,4 @@ captions.txt
 features.pkl
 Flickr8k_text.txt
 Flickr8k_Dataset
-tokenizer.pkl
 *.pyc
