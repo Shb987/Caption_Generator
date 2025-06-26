@@ -112,8 +112,7 @@ Steps inside the notebook:
 * Train the model
 * Save:
 
-  * `outputs/model.h5`
-  * `outputs/features.pkl`
+  * `outputs/best_model.keras`
   * `outputs/tokenizer.pkl`
 
 ---
@@ -122,8 +121,7 @@ Steps inside the notebook:
 
 Ensure the outputs folder contains:
 
-* `model.h5`
-* `features.pkl`
+* `best_model.keras`
 * `tokenizer.pkl`
 
 Then run:
