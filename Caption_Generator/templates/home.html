@@ -1,5 +1,4 @@
-
-</html><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -25,7 +24,6 @@
                 <div class="flex items-center">
                     <h1 class="ml-4 text-xl font-semibold text-gray-800">AI Image Caption Generator</h1>
                 </div>
-
             </div>
         </div>
     </header>
@@ -52,6 +50,11 @@
                         </div>
                         <div id="image-preview" class="hidden w-full h-full flex items-center justify-center">
                             <img id="preview-image" src="" alt="Preview" class="max-w-full max-h-full object-contain">
+                        </div>
+                        <div id="change-image-container" class="hidden mt-4">
+                            <button id="change-image-button" class="px-4 py-2 bg-secondary text-white font-medium rounded-button hover:bg-secondary/90 transition-colors">
+                                Change Image
+                            </button>
                         </div>
                         <div id="upload-loading" class="hidden flex flex-col items-center">
                             <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -153,12 +156,107 @@
                 </div>
             </div>
         </div>
-
-        
     </main>
 
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const fileInput = document.getElementById("file-input");
+        const uploadContainer = document.getElementById("upload-container");
+        const browseButton = document.getElementById("browse-button");
+        const changeImageButton = document.getElementById("change-image-button");
+        const previewImage = document.getElementById("preview-image");
+        const imagePreview = document.getElementById("image-preview");
+        const changeImageContainer = document.getElementById("change-image-container");
+        const uploadPrompt = document.getElementById("upload-prompt");
+        const generateButton = document.getElementById("generate-button");
+        const captionPlaceholder = document.getElementById("caption-placeholder");
+        const captionResult = document.getElementById("caption-result");
+        const captionText = document.getElementById("caption-text");
+        const captionLoading = document.getElementById("caption-loading");
+        const captionError = document.getElementById("caption-error");
+        const captionErrorMessage = document.getElementById("caption-error-message");
 
+        function resetUploadState() {
+            imagePreview.classList.add("hidden");
+            changeImageContainer.classList.add("hidden");
+            uploadPrompt.classList.remove("hidden");
+            generateButton.disabled = true;
+            generateButton.classList.remove("bg-primary", "text-white", "hover:bg-primary/90");
+            generateButton.classList.add("bg-gray-300", "text-gray-500", "cursor-not-allowed");
+            fileInput.value = "";
+            previewImage.src = "";
+            captionPlaceholder.classList.remove("hidden");
+            captionResult.classList.add("hidden");
+            captionError.classList.add("hidden");
+            captionLoading.classList.add("hidden");
+        }
 
+        browseButton.addEventListener("click", () => fileInput.click());
+        changeImageButton.addEventListener("click", () => {
+            resetUploadState();
+            fileInput.click();
+        });
 
+        uploadContainer.addEventListener("click", () => {
+            if (!imagePreview.classList.contains("hidden")) {
+                fileInput.click();
+            }
+        });
+
+        fileInput.addEventListener("change", function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+                imagePreview.classList.remove("hidden");
+                changeImageContainer.classList.remove("hidden");
+                uploadPrompt.classList.add("hidden");
+                generateButton.disabled = false;
+                generateButton.classList.remove("bg-gray-300", "text-gray-500", "cursor-not-allowed");
+                generateButton.classList.add("bg-primary", "text-white", "hover:bg-primary/90");
+            };
+            reader.readAsDataURL(file);
+        });
+
+        generateButton.addEventListener("click", function () {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            captionPlaceholder.classList.add("hidden");
+            captionResult.classList.add("hidden");
+            captionError.classList.add("hidden");
+            captionLoading.classList.remove("hidden");
+
+            const formData = new FormData();
+            formData.append("image", file);
+
+            fetch("/api/predict/", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Server error");
+                return response.json();
+            })
+            .then(data => {
+                captionLoading.classList.add("hidden");
+                if (data.caption) {
+                    captionText.textContent = data.caption;
+                    captionResult.classList.remove("hidden");
+                } else {
+                    throw new Error("No caption returned");
+                }
+            })
+            .catch(error => {
+                captionLoading.classList.add("hidden");
+                captionError.classList.remove("hidden");
+                captionErrorMessage.textContent = "Failed to generate caption. Try again.";
+                console.error(error);
+            });
+        });
+    });
+    </script>
 </body>
 </html>
