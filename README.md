@@ -28,8 +28,9 @@ This project implements an image captioning model using a **Convolutional Neural
 
 Below is a screenshot of the Image Caption Generator web application in action:
 
-![Image Caption Generator UI](./screenshots/Screenshot 2025-06-26 132205.png)
+![Image Caption Generator UI](./screenshots/scr1.png)
 
+*Note*: To add your own screenshot, place the image file in the `screenshots/` directory and update the path above accordingly.
 
 ---
 ## ⚙️ Installation & Setup
